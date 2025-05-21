@@ -1,6 +1,6 @@
 from surprise import AlgoBase
 from surprise import PredictionImpossible
-from MovieLens import MovieLens
+from ai.MovieLens import MovieLens
 import math
 import numpy as np
 import heapq

@@ -30,8 +30,6 @@ protobuf==5.29.4
 pyasn1==0.6.1
 pyasn1_modules==0.4.2
 pyls-spyder==0.4.0
-PyQt5==5.15.10
-PyQtWebEngine==5.15.6
 pytz==2025.1
 rsa==4.9.1
 scikit-learn==1.6.1

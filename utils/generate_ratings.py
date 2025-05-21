@@ -38,7 +38,7 @@ def generate_ratings_csv(firebase_uid):
     file_path = 'ml-latest-small/ratings.csv'
 
     try:
-        existing_df = pd.read_csv(file_path)
+        existing_df = pd.read_csv(file_path, encoding='ISO-8859-1')
     except FileNotFoundError:
         existing_df = pd.DataFrame(columns=['userId', 'movieId', 'rating', 'timestamp'])
 

@@ -45,7 +45,7 @@ class MovieLens:
     def getUserRatings(self, user):
         userRatings = []
         hitUser = False
-        with open(self.ratingsPath, newline='') as csvfile:
+        with open(self.ratingsPath, newline='', encoding='ISO-8859-1') as csvfile:
             ratingReader = csv.reader(csvfile)
             next(ratingReader)
             for row in ratingReader:

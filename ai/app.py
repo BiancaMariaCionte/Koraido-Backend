@@ -47,7 +47,7 @@ class MovieLens:
         reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1)
         ratingsDataset = Dataset.load_from_file(self.ratingsPath, reader=reader)
 
-        with open(self.moviesPath, newline='', encoding='ISO-8859-1') as csvfile:
+        with open(self.moviesPath, newline='', encoding='utf-8') as csvfile:
             movieReader = csv.reader(csvfile)
             next(movieReader)  # Skip header line
             for row in movieReader:
@@ -90,7 +90,7 @@ class MovieLens:
         self.genreIDs = {}  # Store genre IDs globally
         maxGenreID = 0
 
-        with open(self.moviesPath, newline='', encoding='ISO-8859-1') as csvfile:
+        with open(self.moviesPath, newline='', encoding='utf-8') as csvfile:
             movieReader = csv.reader(csvfile)
             next(movieReader)  # Skip header line
             for row in movieReader:

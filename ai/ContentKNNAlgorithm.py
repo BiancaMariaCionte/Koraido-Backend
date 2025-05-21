@@ -196,25 +196,25 @@ class ContentKNNAlgorithm(AlgoBase):
         #print("=" * 50)  # Separator for readability
         return weightedSum / simTotal  # Final predicted rating
     
-    def exportSimilarityMatrix(self):
-       """Export similarity matrix to a CSV file with both movie IDs and names."""
-       print("Exporting similarity matrix to CSV...")
+    # def exportSimilarityMatrix(self):
+    #    """Export similarity matrix to a CSV file with both movie IDs and names."""
+    #    print("Exporting similarity matrix to CSV...")
    
-       # Get movie IDs and names
-       ml = MovieLens()
-       movie_ids = [self.trainset.to_raw_iid(innerID) for innerID in range(self.trainset.n_items)]
-       movie_names = [ml.getMovieName(movie_id) for movie_id in movie_ids]
+    #    # Get movie IDs and names
+    #    ml = MovieLens()
+    #    movie_ids = [self.trainset.to_raw_iid(innerID) for innerID in range(self.trainset.n_items)]
+    #    movie_names = [ml.getMovieName(movie_id) for movie_id in movie_ids]
    
-       # Create row and column labels with "ID - Name" format
-       movie_labels = [f"{movie_id} - {name}" for movie_id, name in zip(movie_ids, movie_names)]
+    #    # Create row and column labels with "ID - Name" format
+    #    movie_labels = [f"{movie_id} - {name}" for movie_id, name in zip(movie_ids, movie_names)]
    
-       # Convert similarity matrix to DataFrame with labeled rows and columns
-       df_item_sim = pd.DataFrame(self.similarities, index=movie_labels, columns=movie_labels)
+    #    # Convert similarity matrix to DataFrame with labeled rows and columns
+    #    df_item_sim = pd.DataFrame(self.similarities, index=movie_labels, columns=movie_labels)
    
    
-       # Save to CSV
-       df_item_sim.to_csv("item_similarity_matrix.csv", encoding="utf-8-sig")
-       print("Item similarity matrix saved to 'item_similarity_matrix.csv'.")
+    #    # Save to CSV
+    #    df_item_sim.to_csv("item_similarity_matrix.csv", encoding="utf-8-sig")
+    #    print("Item similarity matrix saved to 'item_similarity_matrix.csv'.")
 
 
 

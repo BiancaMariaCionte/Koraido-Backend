@@ -27,9 +27,21 @@ class MovieLens:
     def __init__(self):
         self.movieID_to_name = {}
         self.name_to_movieID = {}
-        self.ratingsPath = 'ml-latest-small/ratings.csv'
-        self.moviesPath = 'ml-latest-small/movies.csv'
-        self.userInfoPath = 'ml-latest-small/user_info.xlsx'
+
+        # Get path relative to current file (ai/app.py)
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+        # Load ratings.csv
+        ratings_path = os.path.join(base_path, "ml-latest-small", "ratings.csv")
+        ratings_df = pd.read_csv(ratings_path)
+
+        # Load movies.csv
+        movies_path = os.path.join(base_path, "ml-latest-small", "movies.csv")
+        movies_df = pd.read_csv(movies_path)
+
+        # Load user_info.xlsx
+        user_info_path = os.path.join(base_path, "ml-latest-small", "user_info.xlsx")
+        user_info_df = pd.read_excel(user_info_path)
 
     def loadMovieLensLatestSmall(self):
         reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1)

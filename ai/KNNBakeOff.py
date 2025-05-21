@@ -5,12 +5,12 @@ Created on Thu May  3 11:11:13 2018
 @author: Frank
 """
 
-from MovieLens import MovieLens
+from ai.MovieLens import MovieLens
 from surprise import KNNBasic
 from surprise import NormalPredictor
-from Evaluator import Evaluator
-from ContentKNNAlgorithm import ContentKNNAlgorithm
-from EnsembleAlgorithm import EnsembleAlgorithm
+from ai.Evaluator import Evaluator
+from ai.ContentKNNAlgorithm import ContentKNNAlgorithm
+from ai.EnsembleAlgorithm import EnsembleAlgorithm
 
 import random
 import numpy as np

@@ -13,12 +13,11 @@ import pandas as pd
 import numpy as np
 from surprise import Dataset, Reader, KNNBasic
 import csv
-from ContentKNNAlgorithm import ContentKNNAlgorithm
-from Evaluator import Evaluator
+from ai.ContentKNNAlgorithm import ContentKNNAlgorithm
+from ai.Evaluator import Evaluator
 from utils.generate_user_info import generate_user_info_xlsx
 from utils.generate_ratings import generate_ratings_csv
 from services.user_id_mapper import get_numeric_user_id
-from ai.ContentKNNAlgorithm import ContentKNNAlgorithm
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})

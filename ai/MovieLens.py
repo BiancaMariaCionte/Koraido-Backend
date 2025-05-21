@@ -64,7 +64,7 @@ class MovieLens:
     def getPopularityRanks(self):
         ratings = defaultdict(int)
         rankings = defaultdict(int)
-        with open(self.ratingsPath, newline='') as csvfile:
+        with open(self.ratingsPath, newline='', encoding='ISO-8859-1') as csvfile:
             ratingReader = csv.reader(csvfile)
             next(ratingReader)
             for row in ratingReader:

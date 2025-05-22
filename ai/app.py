@@ -37,7 +37,7 @@ class MovieLens:
 
         # Load movies.csv
         movies_path = os.path.join(base_path, "ml-latest-small", "movies.csv")
-        movies_df = pd.read_csv(movies_path)
+        movies_df = pd.read_csv(movies_path, encoding="ISO-8859-1")
 
         # Load user_info.xlsx
         user_info_path = os.path.join(base_path, "ml-latest-small", "user_info.xlsx")

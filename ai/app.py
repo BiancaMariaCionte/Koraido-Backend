@@ -31,17 +31,26 @@ class MovieLens:
         # Get path relative to current file (ai/app.py)
         base_path = os.path.dirname(os.path.abspath(__file__))
 
+        self.ratingsPath = os.path.join(base_path, "ml-latest-small", "ratings.csv")
+        self.moviesPath = os.path.join(base_path, "ml-latest-small", "movies.csv")
+        self.userInfoPath = os.path.join(base_path, "ml-latest-small", "user_info.xlsx")
+
+        # Optionally, load them here if needed
+        ratings_df = pd.read_csv(self.ratingsPath)
+        movies_df = pd.read_csv(self.moviesPath, encoding="ISO-8859-1")
+        user_info_df = pd.read_excel(self.userInfoPath)
+        
         # Load ratings.csv
-        ratings_path = os.path.join(base_path, "ml-latest-small", "ratings.csv")
-        ratings_df = pd.read_csv(ratings_path)
+       # ratings_path = os.path.join(base_path, "ml-latest-small", "ratings.csv")
+       # ratings_df = pd.read_csv(ratings_path)
 
         # Load movies.csv
-        movies_path = os.path.join(base_path, "ml-latest-small", "movies.csv")
-        movies_df = pd.read_csv(movies_path, encoding="ISO-8859-1")
+       # movies_path = os.path.join(base_path, "ml-latest-small", "movies.csv")
+        #movies_df = pd.read_csv(movies_path, encoding="ISO-8859-1")
 
         # Load user_info.xlsx
-        user_info_path = os.path.join(base_path, "ml-latest-small", "user_info.xlsx")
-        user_info_df = pd.read_excel(user_info_path)
+       # user_info_path = os.path.join(base_path, "ml-latest-small", "user_info.xlsx")
+       # user_info_df = pd.read_excel(user_info_path)
 
     def loadMovieLensLatestSmall(self):
         reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1)

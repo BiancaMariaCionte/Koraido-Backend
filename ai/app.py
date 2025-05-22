@@ -125,8 +125,9 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # from your_content_knn_module import ContentKNNAlgorithm
 
 # Initialize Firebase Admin (only once, outside the class)
-SERVICE_ACCOUNT_KEY_PATH = 'path/to/your/serviceAccountKey.json'  # Update path
-cred = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH)
+#SERVICE_ACCOUNT_KEY_PATH = 'path/to/your/serviceAccountKey.json'  # Update path
+firebase_credentials = os.environ.get("FIREBASE_CREDENTIALS_JSON")
+cred = credentials.Certificate(firebase_credentials)
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 

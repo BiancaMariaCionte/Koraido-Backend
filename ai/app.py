@@ -23,36 +23,120 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Load Dataset and Train Models
+# class MovieLens:
+#     def __init__(self):
+#         self.movieID_to_name = {}
+#         self.name_to_movieID = {}
+
+#         # Get path relative to current file (ai/app.py)
+#         base_path = os.path.dirname(os.path.abspath(__file__))
+
+#         self.ratingsPath = os.path.join(base_path, "ml-latest-small", "ratings.csv")
+#         self.moviesPath = os.path.join(base_path, "ml-latest-small", "movies.csv")
+#         self.userInfoPath = os.path.join(base_path, "ml-latest-small", "user_info.xlsx")
+
+#         # Optionally, load them here if needed
+#         ratings_df = pd.read_csv(self.ratingsPath)
+#         movies_df = pd.read_csv(self.moviesPath, encoding="ISO-8859-1")
+#         user_info_df = pd.read_excel(self.userInfoPath)
+        
+#         # Load ratings.csv
+#        # ratings_path = os.path.join(base_path, "ml-latest-small", "ratings.csv")
+#        # ratings_df = pd.read_csv(ratings_path)
+
+#         # Load movies.csv
+#        # movies_path = os.path.join(base_path, "ml-latest-small", "movies.csv")
+#         #movies_df = pd.read_csv(movies_path, encoding="ISO-8859-1")
+
+#         # Load user_info.xlsx
+#        # user_info_path = os.path.join(base_path, "ml-latest-small", "user_info.xlsx")
+#        # user_info_df = pd.read_excel(user_info_path)
+
+#     def loadMovieLensLatestSmall(self):
+#         reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1)
+#         ratingsDataset = Dataset.load_from_file(self.ratingsPath, reader=reader)
+
+#         with open(self.moviesPath, newline='', encoding='ISO-8859-1') as csvfile:
+#             movieReader = csv.reader(csvfile)
+#             next(movieReader)  # Skip header line
+#             for row in movieReader:
+#                 movieID = row[0]
+#                 movieName = row[1]
+#                 self.movieID_to_name[movieID] = movieName
+#                 self.name_to_movieID[movieName] = movieID
+
+#         return ratingsDataset
+
+#     def getMovieName(self, movieID):
+#         return self.movieID_to_name.get(movieID, "")
+    
+#     def loadUserInterests(self):
+#         """Ensure user interests match genre IDs by using the same dictionary."""
+#         user_interests = defaultdict(list)
+
+#         # Ensure genres are already processed
+#         if not hasattr(self, 'genreIDs'):
+#             self.getGenres()  # Generate genre ID mappings if not already loaded
+
+#         df = pd.read_excel(self.userInfoPath)
+
+#         for _, row in df.iterrows():
+#             userID = int(row['userId'])
+#             interestList = row['interests'].split('|') if pd.notna(row['interests']) else []
+#             interestIDList = []
+        
+#             for interest in interestList:
+#                 if interest in self.genreIDs:  # Ensure consistency
+#                     interestIDList.append(self.genreIDs[interest])  # Use genre ID mapping
+
+#             user_interests[userID] = interestIDList  # Assign matched genre IDs to user interests
+        
+        
+#         return user_interests
+    
+#     def getGenres(self):
+#         genres = defaultdict(list)
+#         self.genreIDs = {}  # Store genre IDs globally
+#         maxGenreID = 0
+
+#         with open(self.moviesPath, newline='', encoding='ISO-8859-1') as csvfile:
+#             movieReader = csv.reader(csvfile)
+#             next(movieReader)  # Skip header line
+#             for row in movieReader:
+#                 movieID = row[0]  # Keep as string
+#                 genreList = row[2].split('|')  # Assuming genres are in the 3rd column
+#                 genreIDList = []
+#                 for genre in genreList:
+#                     if genre in self.genreIDs:
+#                         genreID = self.genreIDs[genre]
+#                     else:
+#                         genreID = maxGenreID
+#                         self.genreIDs[genre] = genreID
+#                         maxGenreID += 1
+#                     genreIDList.append(genreID)
+#                 genres[movieID] = genreIDList
+#         return genres
+
+import firebase_admin
+from firebase_admin import credentials, firestore
+
+# Your content-based KNN Algorithm class here, assumed imported or defined already
+# from your_content_knn_module import ContentKNNAlgorithm
+
+# Initialize Firebase Admin (only once, outside the class)
+SERVICE_ACCOUNT_KEY_PATH = 'path/to/your/serviceAccountKey.json'  # Update path
+cred = credentials.Certificate(SERVICE_ACCOUNT_KEY_PATH)
+firebase_admin.initialize_app(cred)
+db = firestore.client()
+
 class MovieLens:
     def __init__(self):
         self.movieID_to_name = {}
         self.name_to_movieID = {}
+        self.genreIDs = {}
+        self.genres = defaultdict(list)  # movieID -> genreIDs
 
-        # Get path relative to current file (ai/app.py)
-        base_path = os.path.dirname(os.path.abspath(__file__))
-
-        self.ratingsPath = os.path.join(base_path, "ml-latest-small", "ratings.csv")
-        self.moviesPath = os.path.join(base_path, "ml-latest-small", "movies.csv")
-        self.userInfoPath = os.path.join(base_path, "ml-latest-small", "user_info.xlsx")
-
-        # Optionally, load them here if needed
-        ratings_df = pd.read_csv(self.ratingsPath)
-        movies_df = pd.read_csv(self.moviesPath, encoding="ISO-8859-1")
-        user_info_df = pd.read_excel(self.userInfoPath)
-        
-        # Load ratings.csv
-       # ratings_path = os.path.join(base_path, "ml-latest-small", "ratings.csv")
-       # ratings_df = pd.read_csv(ratings_path)
-
-        # Load movies.csv
-       # movies_path = os.path.join(base_path, "ml-latest-small", "movies.csv")
-        #movies_df = pd.read_csv(movies_path, encoding="ISO-8859-1")
-
-        # Load user_info.xlsx
-       # user_info_path = os.path.join(base_path, "ml-latest-small", "user_info.xlsx")
-       # user_info_df = pd.read_excel(user_info_path)
-
-    def loadMovieLensLatestSmall(self):
+     def loadMovieLensLatestSmall(self):
         reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1)
         ratingsDataset = Dataset.load_from_file(self.ratingsPath, reader=reader)
 
@@ -69,53 +153,40 @@ class MovieLens:
 
     def getMovieName(self, movieID):
         return self.movieID_to_name.get(movieID, "")
+
     
-    def loadUserInterests(self):
-        """Ensure user interests match genre IDs by using the same dictionary."""
+
+    def loadUserInterestsFromFirestore(self):
+        """Load user interests from Firestore."""
+        users_ref = db.collection('users')
+        docs = users_ref.stream()
+
         user_interests = defaultdict(list)
+        for doc in docs:
+            data = doc.to_dict()
+            user_id = str(data.get('userId') or doc.id)
+            interests = data.get('interests', [])  # expected as list of genres or strings
+            interestIDs = []
+            for interest in interests:
+                if interest in self.genreIDs:
+                    interestIDs.append(self.genreIDs[interest])
+            user_interests[user_id] = interestIDs
 
-        # Ensure genres are already processed
-        if not hasattr(self, 'genreIDs'):
-            self.getGenres()  # Generate genre ID mappings if not already loaded
-
-        df = pd.read_excel(self.userInfoPath)
-
-        for _, row in df.iterrows():
-            userID = int(row['userId'])
-            interestList = row['interests'].split('|') if pd.notna(row['interests']) else []
-            interestIDList = []
-        
-            for interest in interestList:
-                if interest in self.genreIDs:  # Ensure consistency
-                    interestIDList.append(self.genreIDs[interest])  # Use genre ID mapping
-
-            user_interests[userID] = interestIDList  # Assign matched genre IDs to user interests
-        
-        
         return user_interests
-    
-    def getGenres(self):
-        genres = defaultdict(list)
-        self.genreIDs = {}  # Store genre IDs globally
-        maxGenreID = 0
 
-        with open(self.moviesPath, newline='', encoding='ISO-8859-1') as csvfile:
-            movieReader = csv.reader(csvfile)
-            next(movieReader)  # Skip header line
-            for row in movieReader:
-                movieID = row[0]  # Keep as string
-                genreList = row[2].split('|')  # Assuming genres are in the 3rd column
-                genreIDList = []
-                for genre in genreList:
-                    if genre in self.genreIDs:
-                        genreID = self.genreIDs[genre]
-                    else:
-                        genreID = maxGenreID
-                        self.genreIDs[genre] = genreID
-                        maxGenreID += 1
-                    genreIDList.append(genreID)
-                genres[movieID] = genreIDList
-        return genres
+    def loadMovieLensFromFirestore(self):
+        # Load movies first to get genres and movie dictionaries
+        self.loadMoviesFromFirestore()
+
+        # Load ratings
+        ratings_list = self.loadRatingsFromFirestore()
+
+        # Build Surprise Dataset from ratings list
+        df_ratings = pd.DataFrame(ratings_list, columns=['userId', 'movieId', 'rating'])
+        reader = Reader(rating_scale=(1, 5))
+        dataset = Dataset.load_from_df(df_ratings[['userId', 'movieId', 'rating']], reader)
+
+        return dataset
 
 ml = MovieLens()
 data = ml.loadMovieLensLatestSmall()
@@ -200,47 +271,6 @@ def get_item_based_recommendations(testUserInnerID):
 
     return recommendations
 
-
-# def get_content_based_recommendations(testUserInnerID):
-#     """Get Content-Based Recommendations for a user."""
-#     k = 10  # Number of similar movies to consider
-#     testUserRatings = trainSet.ur[testUserInnerID]  # Get the user's ratings
-
-#     if not testUserRatings:
-#         print(f"⚠️ No ratings found for user {testUserInnerID}, returning popular movies.")
-#         return get_popular_movies()
-
-#     candidates = defaultdict(float)
-    
-#     # Iterate over the movies the user has rated
-#     for itemID, rating in testUserRatings:
-#         similarityRow = contentKNN.similarities[itemID]
-
-#         # Compute weighted sum of similarity scores
-#         for innerID, score in enumerate(similarityRow):
-#             if score > 0:  # Only consider positive similarities
-#                 candidates[innerID] += score * (rating / 5.0)
-
-#     # Filter out already watched movies
-#     watched = {itemID for itemID, _ in testUserRatings}
-#     recommendations = []
-
-#     for itemID, ratingSum in sorted(candidates.items(), key=itemgetter(1), reverse=True):
-#         if itemID not in watched:
-#             movieID = trainSet.to_raw_iid(itemID)
-#             name = ml.getMovieName(movieID)
-
-#             recommendations.append({
-#                 "id": movieID,
-#                 "name": name,
-#                 "score": round(ratingSum, 3)
-#             })
-
-#         if len(recommendations) >= 10:
-#             break
-
-#     return recommendations
-
 def get_content_based_recommendations(testUserInnerID):
     """Get Content-Based Recommendations for a user with interest similarity boost."""
     k = 10  # Number of recommendations
@@ -250,9 +280,6 @@ def get_content_based_recommendations(testUserInnerID):
         print(f"⚠️ No ratings found for user {testUserInnerID}, returning popular movies.")
         return get_popular_movies()
 
-    # ml_instance = MovieLens()
-    # user_interests = ml_instance.loadUserInterests()
-    # genres = ml_instance.getGenres()
 
     user_interests = ml.loadUserInterests()
     genres = ml.getGenres()
@@ -316,51 +343,6 @@ def get_content_based_recommendations(testUserInnerID):
     return recommendations
 
 
-
-
-# def get_locations_by_theme(themes, top_n=10):
-#     """
-#     Recommends locations (movies) that share one or more themes (genres).
-#     """
-#     if not hasattr(ml, 'genreIDs'):
-#         ml.getGenres()
-
-#     if isinstance(themes, str):
-#         themes = [themes]
-
-#     themes = [t.strip().lower() for t in themes]
-
-#     # Map theme strings to genre IDs
-#     genre_id_weights = {}
-#     for theme in themes:
-#         for genre, genre_id in ml.genreIDs.items():
-#             if genre.lower() == theme:
-#                 genre_id_weights[genre_id] = 1  # No need for weights
-#                 break
-
-#     if not genre_id_weights:
-#         return []
-
-#     # Find all movies that match any of the selected genre IDs
-#     genres = ml.getGenres()
-#     movie_scores = defaultdict(int)
-
-#     for movieID, movie_genre_ids in genres.items():
-#         for genre_id in movie_genre_ids:
-#             if genre_id in genre_id_weights:
-#                 movie_scores[movieID] += genre_id_weights[genre_id]
-
-#     # Sort by score (descending) and take top N
-#     top_movie_ids = sorted(movie_scores.items(), key=lambda x: x[1], reverse=True)[:top_n]
-
-#     recommendations = [{
-#         "id": movieID,
-#         "name": ml.getMovieName(movieID),
-#         "score": score
-#     } for movieID, score in top_movie_ids]
-
-#     return recommendations
-
 def get_locations_by_theme(themes, top_n=10):
     if not hasattr(ml, 'genreIDs'):
         ml.getGenres()
@@ -402,15 +384,6 @@ def get_locations_by_theme(themes, top_n=10):
 
     return recommendations
 
-
-
-
-
-
-
-
-    
-
 def get_popular_movies():
     """Simple fallback to popular movies."""
     popular_movie_ids = list(ml.movieID_to_name.keys())[:10]
@@ -443,9 +416,7 @@ def reload_models():
 
     contentKNN.fit(trainSet)
 
-    # Optionally, print the content similarities matrix for debugging
-    #print("Content Similarities Matrix after Reload:")
-    #print(contentKNN.similarities[:5, :5])  # Check a small portion to confirm it's updated
+
 
 @app.route('/ping', methods=['GET'])
 def ping():

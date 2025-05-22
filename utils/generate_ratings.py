@@ -102,7 +102,7 @@ import time
 from services.firebase_config import db
 from services.user_id_mapper import get_numeric_user_id
 
-def generate_ratings_firestore(firebase_uid):
+def generate_ratings_csv(firebase_uid):
     user_id = get_numeric_user_id(firebase_uid)
     new_ratings = []
 

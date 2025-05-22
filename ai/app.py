@@ -19,6 +19,9 @@ from utils.generate_user_info import generate_user_info_xlsx
 from utils.generate_ratings import generate_ratings_csv
 from services.user_id_mapper import get_numeric_user_id
 
+import firebase_admin
+from firebase_admin import credentials, firestore
+
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
@@ -117,8 +120,6 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 #                 genres[movieID] = genreIDList
 #         return genres
 
-import firebase_admin
-from firebase_admin import credentials, firestore
 
 # Your content-based KNN Algorithm class here, assumed imported or defined already
 # from your_content_knn_module import ContentKNNAlgorithm
@@ -130,63 +131,63 @@ firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 class MovieLens:
-    def __init__(self):
-        self.movieID_to_name = {}
-        self.name_to_movieID = {}
-        self.genreIDs = {}
-        self.genres = defaultdict(list)  # movieID -> genreIDs
+        def __init__(self):
+                self.movieID_to_name = {}
+                self.name_to_movieID = {}
+                self.genreIDs = {}
+                self.genres = defaultdict(list)  # movieID -> genreIDs
 
-     def loadMovieLensLatestSmall(self):
-        reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1)
-        ratingsDataset = Dataset.load_from_file(self.ratingsPath, reader=reader)
+        def loadMovieLensLatestSmall(self):
+                reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1)
+                ratingsDataset = Dataset.load_from_file(self.ratingsPath, reader=reader)
 
-        with open(self.moviesPath, newline='', encoding='ISO-8859-1') as csvfile:
-            movieReader = csv.reader(csvfile)
-            next(movieReader)  # Skip header line
-            for row in movieReader:
-                movieID = row[0]
-                movieName = row[1]
-                self.movieID_to_name[movieID] = movieName
-                self.name_to_movieID[movieName] = movieID
+                with open(self.moviesPath, newline='', encoding='ISO-8859-1') as csvfile:
+                    movieReader = csv.reader(csvfile)
+                    next(movieReader)  # Skip header line
+                    for row in movieReader:
+                        movieID = row[0]
+                        movieName = row[1]
+                        self.movieID_to_name[movieID] = movieName
+                        self.name_to_movieID[movieName] = movieID
+        
+                return ratingsDataset
 
-        return ratingsDataset
-
-    def getMovieName(self, movieID):
-        return self.movieID_to_name.get(movieID, "")
+        def getMovieName(self, movieID):
+                return self.movieID_to_name.get(movieID, "")
 
     
 
-    def loadUserInterestsFromFirestore(self):
-        """Load user interests from Firestore."""
-        users_ref = db.collection('users')
-        docs = users_ref.stream()
+        def loadUserInterestsFromFirestore(self):
+                """Load user interests from Firestore."""
+                users_ref = db.collection('users')
+                docs = users_ref.stream()
+        
+                user_interests = defaultdict(list)
+                for doc in docs:
+                    data = doc.to_dict()
+                    user_id = str(data.get('userId') or doc.id)
+                    interests = data.get('interests', [])  # expected as list of genres or strings
+                    interestIDs = []
+                    for interest in interests:
+                        if interest in self.genreIDs:
+                            interestIDs.append(self.genreIDs[interest])
+                    user_interests[user_id] = interestIDs
+        
+                return user_interests
 
-        user_interests = defaultdict(list)
-        for doc in docs:
-            data = doc.to_dict()
-            user_id = str(data.get('userId') or doc.id)
-            interests = data.get('interests', [])  # expected as list of genres or strings
-            interestIDs = []
-            for interest in interests:
-                if interest in self.genreIDs:
-                    interestIDs.append(self.genreIDs[interest])
-            user_interests[user_id] = interestIDs
-
-        return user_interests
-
-    def loadMovieLensFromFirestore(self):
-        # Load movies first to get genres and movie dictionaries
-        self.loadMoviesFromFirestore()
-
-        # Load ratings
-        ratings_list = self.loadRatingsFromFirestore()
-
-        # Build Surprise Dataset from ratings list
-        df_ratings = pd.DataFrame(ratings_list, columns=['userId', 'movieId', 'rating'])
-        reader = Reader(rating_scale=(1, 5))
-        dataset = Dataset.load_from_df(df_ratings[['userId', 'movieId', 'rating']], reader)
-
-        return dataset
+        def loadMovieLensFromFirestore(self):
+                # Load movies first to get genres and movie dictionaries
+                self.loadMoviesFromFirestore()
+        
+                # Load ratings
+                ratings_list = self.loadRatingsFromFirestore()
+        
+                # Build Surprise Dataset from ratings list
+                df_ratings = pd.DataFrame(ratings_list, columns=['userId', 'movieId', 'rating'])
+                reader = Reader(rating_scale=(1, 5))
+                dataset = Dataset.load_from_df(df_ratings[['userId', 'movieId', 'rating']], reader)
+        
+                return dataset
 
 ml = MovieLens()
 data = ml.loadMovieLensLatestSmall()

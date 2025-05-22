@@ -10,9 +10,15 @@ def load_user_map():
             return json.load(f)
     return {}
 
+# def save_user_map(user_map):
+#     with open(USER_MAP_PATH, 'w') as f:
+#         json.dump(user_map, f)
+
+
 def save_user_map(user_map):
+    os.makedirs(os.path.dirname(USER_MAP_PATH), exist_ok=True)  # Ensure directory exists
     with open(USER_MAP_PATH, 'w') as f:
-        json.dump(user_map, f)
+        json.dump(user_map, f, indent=2)
 
 
 def get_numeric_user_id(firebase_uid):

@@ -14,7 +14,7 @@ import pandas as pd
 class MovieLens:
         def __init__(self):
                 base_dir = os.path.dirname(os.path.abspath(__file__))  # Path to ai/
-                data_dir = os.path.join(base_dir, "..", "ml-latest-small")  # Goes up to project root, then into data folder
+                data_dir = os.path.join(base_dir, "ml-latest-small")  # ml-latest-small inside ai folder
                 self.ratingsPath = os.path.join(data_dir, "ratings.csv")
                 self.moviesPath = os.path.join(data_dir, "movies.csv")
                 self.userInfoPath = os.path.join(data_dir, "user_info.xlsx")

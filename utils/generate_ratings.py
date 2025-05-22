@@ -17,7 +17,13 @@ def generate_ratings_csv(firebase_uid):
 
     for location in location_docs:
         reviews_ref = location.reference.collection('reviews')
-        user_reviews = reviews_ref.where('userId', '==', firebase_uid).stream()
+        #user_reviews = reviews_ref.where('userId', '==', firebase_uid).stream()
+        print("🔍 Starting Firestore query for user reviews...")
+        user_reviews = db.collection("reviews") \
+            .where("user_id", "==", firebase_uid) \
+            .limit(50).stream()
+        print("✅ Firestore query finished.")
+
 
         for review in user_reviews:
             review_data = review.to_dict()

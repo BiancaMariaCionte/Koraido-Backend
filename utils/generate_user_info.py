@@ -68,7 +68,7 @@
 from services.firebase_config import db
 from services.user_id_mapper import get_numeric_user_id
 
-def generate_user_info_firestore(firebase_uid):
+def generate_user_info_xlsx(firebase_uid):
     user_id = get_numeric_user_id(firebase_uid)
     print(f'Generated numeric user ID: {user_id} for Firebase UID: {firebase_uid}')
 

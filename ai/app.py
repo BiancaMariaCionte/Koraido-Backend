@@ -18,7 +18,7 @@ from ai.Evaluator import Evaluator
 from utils.generate_user_info import generate_user_info_xlsx
 from utils.generate_ratings import generate_ratings_csv
 from services.user_id_mapper import get_numeric_user_id
-
+from services.firebase_config import db
 import firebase_admin
 from firebase_admin import credentials, firestore
 
@@ -125,11 +125,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 # from your_content_knn_module import ContentKNNAlgorithm
 
 # Initialize Firebase Admin (only once, outside the class)
-#SERVICE_ACCOUNT_KEY_PATH = 'path/to/your/serviceAccountKey.json'  # Update path
-firebase_credentials = os.environ.get("FIREBASE_CREDENTIALS_JSON")
-cred = credentials.Certificate(firebase_credentials)
-firebase_admin.initialize_app(cred)
-db = firestore.client()
+
 
 class MovieLens:
         def __init__(self):

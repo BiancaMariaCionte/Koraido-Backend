@@ -13,11 +13,21 @@ import pandas as pd
 
 class MovieLens:
 
-    movieID_to_name = {}
-    name_to_movieID = {}
-    ratingsPath = 'ml-latest-small/ratings.csv' 
-    moviesPath = 'ml-latest-small/movies.csv'  
-    userInfoPath = 'ml-latest-small/user_info.xlsx'
+        base_dir = os.path.dirname(os.path.abspath(__file__))  # Path to ai/
+        data_dir = os.path.join(base_dir, "..", "ml-latest-small")  # Goes up to project root, then into data folder
+
+        self.ratingsPath = os.path.join(data_dir, "ratings.csv")
+        self.moviesPath = os.path.join(data_dir, "movies.csv")
+        self.userInfoPath = os.path.join(data_dir, "user_info.xlsx")
+
+        self.movieID_to_name = {}
+        self.name_to_movieID = {}
+
+    # movieID_to_name = {}
+    # name_to_movieID = {}
+    # ratingsPath = 'ml-latest-small/ratings.csv' 
+    # moviesPath = 'ml-latest-small/movies.csv'  
+    # userInfoPath = 'ml-latest-small/user_info.xlsx'
     
     def loadMovieLensLatestSmall(self):
 

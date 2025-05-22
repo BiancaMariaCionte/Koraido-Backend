@@ -71,7 +71,7 @@ class ContentKNNAlgorithm(AlgoBase):
        # np.fill_diagonal(self.similarities, 1.0)
     
         print("...done.")
-        self.exportSimilarityMatrix()
+        #self.exportSimilarityMatrix()
 
         return self
 

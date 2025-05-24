@@ -141,20 +141,20 @@ class MovieLens:
                 with open(self.movies_path, newline='', encoding='ISO-8859-1') as csvfile:  # use the correct attribute
                         movieReader = csv.reader(csvfile)
                         next(movieReader)  # Skip header
-                for row in movieReader:
-                    movieID = row[0]
-                    movieName = row[1]
-                    genreList = row[2].split('|')
-        
-                    self.movieID_to_name[movieID] = movieName
-                    self.name_to_movieID[movieName] = movieID
-        
-                    genreIDList = []
-                    for genre in genreList:
-                        if genre not in self.genreIDs:
-                            self.genreIDs[genre] = len(self.genreIDs)
-                        genreIDList.append(self.genreIDs[genre])
-                    self.genres[movieID] = genreIDList
+                        for row in movieReader:
+                            movieID = row[0]
+                            movieName = row[1]
+                            genreList = row[2].split('|')
+                
+                            self.movieID_to_name[movieID] = movieName
+                            self.name_to_movieID[movieName] = movieID
+                
+                            genreIDList = []
+                            for genre in genreList:
+                                if genre not in self.genreIDs:
+                                    self.genreIDs[genre] = len(self.genreIDs)
+                                genreIDList.append(self.genreIDs[genre])
+                            self.genres[movieID] = genreIDList
 
         def loadRatingsFromFirestore(self):
                 ratings_ref = db.collection('ratings').stream()

@@ -155,6 +155,10 @@ class MovieLens:
                 self.name_to_movieID = {}
                 self.genreIDs = {}
 
+                base_dir = os.path.dirname(os.path.abspath(__file__))  # Path to ai/
+                data_dir = os.path.join(base_dir, "ml-latest-small")  # ml-latest-small inside ai folder
+                self.moviesPath = os.path.join(data_dir, "movies.csv")
+                
         def loadMovieLensLatestSmall(self):
                 # Load ratings from Firestore
                 ratings_ref = db.collection('ratings').stream()

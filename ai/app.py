@@ -133,28 +133,24 @@ class MovieLens:
                 self.name_to_movieID = {}
                 self.genreIDs = {}
                 self.genres = defaultdict(list)  # movieID -> genreIDs
-            # Get path relative to current file (ai/app.py)
-                base_path = os.path.dirname(os.path.abspath(__file__))
-                self.movies_path = os.path.join(base_path, "ml-latest-small", "movies.csv")  # use snake_case consistently
 
-        def loadMoviesCSV(self):
-                with open(self.movies_path, newline='', encoding='ISO-8859-1') as csvfile:  # use the correct attribute
-                        movieReader = csv.reader(csvfile)
-                        next(movieReader)  # Skip header
-                        for row in movieReader:
-                            movieID = row[0]
-                            movieName = row[1]
-                            genreList = row[2].split('|')
-                
-                            self.movieID_to_name[movieID] = movieName
-                            self.name_to_movieID[movieName] = movieID
-                
-                            genreIDList = []
-                            for genre in genreList:
-                                if genre not in self.genreIDs:
-                                    self.genreIDs[genre] = len(self.genreIDs)
-                                genreIDList.append(self.genreIDs[genre])
-                            self.genres[movieID] = genreIDList
+        def loadMoviesFromFirestore(self):
+                movies_ref = db.collection('movies').stream()
+                for doc in movies_ref:
+                    movie = doc.to_dict()
+                    movieID = str(movie['movieId'])
+                    movieName = movie['title']
+                    genreList = movie['genres'].split('|')
+        
+                    self.movieID_to_name[movieID] = movieName
+                    self.name_to_movieID[movieName] = movieID
+        
+                    genreIDList = []
+                    for genre in genreList:
+                        if genre not in self.genreIDs:
+                            self.genreIDs[genre] = len(self.genreIDs)
+                        genreIDList.append(self.genreIDs[genre])
+                    self.genres[movieID] = genreIDList
 
         def loadRatingsFromFirestore(self):
                 ratings_ref = db.collection('ratings').stream()
@@ -179,7 +175,7 @@ class MovieLens:
 
         def loadMovieLensLatestSmall(self):
                 """Main method to initialize the dataset."""
-                self.loadMoviesCSV()
+                self.loadMoviesFromFirestore()
                 ratings = self.loadRatingsFromFirestore()
                 df_ratings = pd.DataFrame(ratings, columns=['userId', 'movieId', 'rating'])
         
@@ -210,8 +206,6 @@ sim_options_item = {'name': 'pearson', 'user_based': False}
 itemKNN = KNNBasic(sim_options=sim_options_item)
 itemKNN.fit(trainSet)
 item_sims = itemKNN.compute_similarities()
-
-
 
 # Train Content-Based KNN Model
 contentKNN = ContentKNNAlgorithm()

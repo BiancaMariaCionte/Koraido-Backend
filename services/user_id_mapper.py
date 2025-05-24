@@ -45,7 +45,7 @@
 import json
 import os
 import pandas as pd
-from services.firebase_setup import db  # Adjust based on your setup
+from services.firebase_config import db  # Adjust based on your setup
 
 USER_MAP_PATH = 'ml-latest-small/user_id_map.json'
 

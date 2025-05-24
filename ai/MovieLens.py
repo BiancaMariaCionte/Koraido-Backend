@@ -245,3 +245,14 @@ class MovieLens:
         def getMovieID(self, movieName):
                 return self.name_to_movieID.get(movieName, "")
 
+        def getMovieRatings(self):
+                ratings = {}
+                with open(self.moviesPath, newline='', encoding='ISO-8859-1') as csvfile:
+                    movieReader = csv.reader(csvfile)
+                    next(movieReader)
+                    for row in movieReader:
+                        movieID = row[0]
+                        rating = float(row[3])  # Assuming rating is in the 4th column
+                        ratings[movieID] = rating
+                return ratings
+

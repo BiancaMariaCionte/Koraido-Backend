@@ -196,58 +196,8 @@ class ContentKNNAlgorithm(AlgoBase):
         #print("=" * 50)  # Separator for readability
         return weightedSum / simTotal  # Final predicted rating
     
-    # def exportSimilarityMatrix(self):
-    #    """Export similarity matrix to a CSV file with both movie IDs and names."""
-    #    print("Exporting similarity matrix to CSV...")
    
-    #    # Get movie IDs and names
-    #    ml = MovieLens()
-    #    movie_ids = [self.trainset.to_raw_iid(innerID) for innerID in range(self.trainset.n_items)]
-    #    movie_names = [ml.getMovieName(movie_id) for movie_id in movie_ids]
-   
-    #    # Create row and column labels with "ID - Name" format
-    #    movie_labels = [f"{movie_id} - {name}" for movie_id, name in zip(movie_ids, movie_names)]
-   
-    #    # Convert similarity matrix to DataFrame with labeled rows and columns
-    #    df_item_sim = pd.DataFrame(self.similarities, index=movie_labels, columns=movie_labels)
-   
-   
-    #    # Save to CSV
-    #    df_item_sim.to_csv("item_similarity_matrix.csv", encoding="utf-8-sig")
-    #    print("Item similarity matrix saved to 'item_similarity_matrix.csv'.")
 
 
 
-
-
-    # def get_recommendations(self, user_id, ml, n=10):
-    #     """
-    #     Get top N content-based recommendations for a given user.
-    #     """
-    #     try:
-    #         user_inner_id = self.trainset.to_inner_uid(user_id)
-    #     except ValueError:
-    #         print(f"User {user_id} not found in training data.")
-    #         return []
-
-
-    #     user_inner_id = self.trainset.to_inner_uid(user_id)
-    #     watched_movies = set([self.trainset.to_raw_iid(item[0]) for item in self.trainset.ur[user_inner_id]])
-        
-    #     all_movie_ids = set(self.trainset.to_raw_iid(i) for i in range(self.trainset.n_items))
-    #     candidate_movies = all_movie_ids - watched_movies  # Movies the user hasn't seen
-        
-    #     recommendations = []
-    #     for movie in candidate_movies:
-    #         movie_inner_id = self.trainset.to_inner_iid(movie)
-    #         predicted_rating = self.estimate(user_inner_id, movie_inner_id)
-    #         recommendations.append((predicted_rating, movie))
-
-    #     # Get top N recommendations
-    #     top_n_recommendations = heapq.nlargest(n, recommendations, key=lambda x: x[0])
-
-    #     # Convert movie IDs to names
-    #     recommended_movies = [(ml.getMovieName(movie_id), rating) for rating, movie_id in top_n_recommendations]
-
-    #     return recommended_movies
 

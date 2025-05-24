@@ -146,11 +146,6 @@ from services.firebase_config import db
 from surprise import Dataset, Reader
 from collections import defaultdict
 import pandas as pd
-import numpy as np
-import os
-import csv
-import sys
-import re
 
 class MovieLens:
 
@@ -159,31 +154,33 @@ class MovieLens:
                 self.name_to_movieID = {}
                 self.genreIDs = {}
 
-                base_dir = os.path.dirname(os.path.abspath(__file__))  # Path to ai/
-                data_dir = os.path.join(base_dir, "ml-latest-small")  # ml-latest-small inside ai folder
-                self.moviesPath = os.path.join(data_dir, "movies.csv")
-                
         def loadMovieLensLatestSmall(self):
                 # Load ratings from Firestore
                 ratings_ref = db.collection('ratings').stream()
                 rating_data = []
                 for doc in ratings_ref:
                     entry = doc.to_dict()
-                    rating_data.append([str(entry['userId']), str(entry['movieId']), float(entry['rating']), int(entry['timestamp'])])
+                    rating_data.append([
+                        str(entry['userId']), 
+                        str(entry['movieId']), 
+                        float(entry['rating']), 
+                        int(entry['timestamp'])
+                    ])
         
                 reader = Reader(line_format='user item rating timestamp', sep=',')
-                ratingsDataset = Dataset.load_from_df(pd.DataFrame(rating_data, columns=["user", "item", "rating", "timestamp"]), reader)
+                ratingsDataset = Dataset.load_from_df(
+                    pd.DataFrame(rating_data, columns=["user", "item", "rating", "timestamp"]),
+                    reader
+                )
         
-                # Load movies from local CSV (you can move this to Firestore later if needed)
-                with open('ml-latest-small/movies.csv', newline='', encoding='ISO-8859-1') as csvfile:
-                    import csv
-                    movieReader = csv.reader(csvfile)
-                    next(movieReader)
-                    for row in movieReader:
-                        movieID = row[0]
-                        movieName = row[1]
-                        self.movieID_to_name[movieID] = movieName
-                        self.name_to_movieID[movieName] = movieID
+                # Load movie info from Firestore instead of CSV
+                movies_ref = db.collection('movies').stream()
+                for doc in movies_ref:
+                    movie_id = doc.id
+                    movie_data = doc.to_dict()
+                    title = movie_data.get('title', '')
+                    self.movieID_to_name[movie_id] = title
+                    self.name_to_movieID[title] = movie_id
         
                 return ratingsDataset
 
@@ -215,20 +212,19 @@ class MovieLens:
                 genres = defaultdict(list)
                 maxGenreID = 0
         
-                with open('ml-latest-small/movies.csv', newline='', encoding='ISO-8859-1') as csvfile:
-                    import csv
-                    movieReader = csv.reader(csvfile)
-                    next(movieReader)
-                    for row in movieReader:
-                        movieID = row[0]
-                        genreList = row[2].split('|')
-                        genreIDList = []
-                        for genre in genreList:
-                            if genre not in self.genreIDs:
-                                self.genreIDs[genre] = maxGenreID
-                                maxGenreID += 1
-                            genreIDList.append(self.genreIDs[genre])
-                        genres[movieID] = genreIDList
+                # Load movie genres from Firestore
+                movies_ref = db.collection('movies').stream()
+                for doc in movies_ref:
+                    movieID = doc.id
+                    movie_data = doc.to_dict()
+                    genreList = movie_data.get('genres', '').split('|')
+                    genreIDList = []
+                    for genre in genreList:
+                        if genre not in self.genreIDs:
+                            self.genreIDs[genre] = maxGenreID
+                            maxGenreID += 1
+                        genreIDList.append(self.genreIDs[genre])
+                    genres[movieID] = genreIDList
         
                 return genres
 
@@ -240,8 +236,8 @@ class MovieLens:
                 users_ref = db.collection('user_info').stream()
                 for doc in users_ref:
                     data = doc.to_dict()
-                    userID = int(data['userId'])
-                    interestList = data['interests'].split('|') if 'interests' in data else []
+                    userID = int(doc.id)  # Using Firestore document ID as userId
+                    interestList = data.get('interests', '').split('|')
                     interestIDList = [self.genreIDs[interest] for interest in interestList if interest in self.genreIDs]
                     user_interests[userID] = interestIDList
         
@@ -255,12 +251,11 @@ class MovieLens:
 
         def getMovieRatings(self):
                 ratings = {}
-                with open(self.moviesPath, newline='', encoding='ISO-8859-1') as csvfile:
-                    movieReader = csv.reader(csvfile)
-                    next(movieReader)
-                    for row in movieReader:
-                        movieID = row[0]
-                        rating = float(row[3])  # Assuming rating is in the 4th column
-                        ratings[movieID] = rating
+                movies_ref = db.collection('movies').stream()
+                for doc in movies_ref:
+                    movieID = doc.id
+                    movie_data = doc.to_dict()
+                    if 'rating' in movie_data:
+                        ratings[movieID] = float(movie_data['rating'])
                 return ratings
 

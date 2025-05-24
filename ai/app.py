@@ -134,57 +134,63 @@ class MovieLens:
                 self.genreIDs = {}
                 self.genres = defaultdict(list)  # movieID -> genreIDs
 
-        def loadMovieLensLatestSmall(self):
-                reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1)
-                ratingsDataset = Dataset.load_from_file(self.ratingsPath, reader=reader)
-
-                with open(self.moviesPath, newline='', encoding='ISO-8859-1') as csvfile:
+        def loadMoviesCSV(self, movies_path='ml-latest-small/movies.csv'):
+                with open(movies_path, newline='', encoding='ISO-8859-1') as csvfile:
                     movieReader = csv.reader(csvfile)
-                    next(movieReader)  # Skip header line
+                    next(movieReader)  # Skip header
                     for row in movieReader:
                         movieID = row[0]
                         movieName = row[1]
+                        genreList = row[2].split('|')
+        
                         self.movieID_to_name[movieID] = movieName
                         self.name_to_movieID[movieName] = movieID
         
-                return ratingsDataset
+                        genreIDList = []
+                        for genre in genreList:
+                            if genre not in self.genreIDs:
+                                self.genreIDs[genre] = len(self.genreIDs)
+                            genreIDList.append(self.genreIDs[genre])
+                        self.genres[movieID] = genreIDList
 
-        def getMovieName(self, movieID):
-                return self.movieID_to_name.get(movieID, "")
-
-    
+        def loadRatingsFromFirestore(self):
+                ratings_ref = db.collection('ratings').stream()
+                rating_data = []
+                for doc in ratings_ref:
+                    entry = doc.to_dict()
+                    rating_data.append([str(entry['userId']), str(entry['movieId']), float(entry['rating'])])
+                return rating_data
 
         def loadUserInterestsFromFirestore(self):
-                """Load user interests from Firestore."""
-                users_ref = db.collection('users')
-                docs = users_ref.stream()
-        
+                users_ref = db.collection('user_info').stream()
                 user_interests = defaultdict(list)
-                for doc in docs:
+        
+                for doc in users_ref:
                     data = doc.to_dict()
-                    user_id = str(data.get('userId') or doc.id)
-                    interests = data.get('interests', [])  # expected as list of genres or strings
-                    interestIDs = []
-                    for interest in interests:
-                        if interest in self.genreIDs:
-                            interestIDs.append(self.genreIDs[interest])
+                    user_id = str(data.get('userId', doc.id))
+                    interests = data.get('interests', "").split('|')
+                    interestIDs = [self.genreIDs[genre] for genre in interests if genre in self.genreIDs]
                     user_interests[user_id] = interestIDs
         
                 return user_interests
 
-        def loadMovieLensFromFirestore(self):
-                # Load movies first to get genres and movie dictionaries
-                self.loadMoviesFromFirestore()
+        def loadMovieLensLatestSmall(self):
+                """Main method to initialize the dataset."""
+                self.loadMoviesCSV()
+                ratings = self.loadRatingsFromFirestore()
+                df_ratings = pd.DataFrame(ratings, columns=['userId', 'movieId', 'rating'])
         
-                # Load ratings
-                ratings_list = self.loadRatingsFromFirestore()
-        
-                # Build Surprise Dataset from ratings list
-                df_ratings = pd.DataFrame(ratings_list, columns=['userId', 'movieId', 'rating'])
                 reader = Reader(rating_scale=(1, 5))
-                dataset = Dataset.load_from_df(df_ratings[['userId', 'movieId', 'rating']], reader)
-        
-                return dataset
+                return Dataset.load_from_df(df_ratings, reader)
+
+        def getGenres(self):
+                return self.genres
+
+        def getMovieName(self, movieID):
+                return self.movieID_to_name.get(movieID, "")
+
+        def getMovieID(self, movieName):
+                return self.name_to_movieID.get(movieName, "")
 
 ml = MovieLens()
 data = ml.loadMovieLensLatestSmall()

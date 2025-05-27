@@ -160,7 +160,7 @@ class MovieLens:
                     rating_data.append([str(entry['userId']), str(entry['movieId']), float(entry['rating'])])
                 return rating_data
 
-        def loadUserInterestsFromFirestore(self):
+        def loadUserInterests(self):
                 users_ref = db.collection('user_info').stream()
                 user_interests = defaultdict(list)
         

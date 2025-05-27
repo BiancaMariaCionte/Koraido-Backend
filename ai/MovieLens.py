@@ -229,19 +229,20 @@ class MovieLens:
                 return genres
 
         def loadUserInterests(self):
-                user_interests = defaultdict(list)
-                if not self.genreIDs:
-                    self.getGenres()
+            user_interests = defaultdict(list)
+            if not self.genreIDs:
+                self.getGenres()
         
-                users_ref = db.collection('user_info').stream()
-                for doc in users_ref:
-                    data = doc.to_dict()
-                    userID = int(doc.id)  # Using Firestore document ID as userId
-                    interestList = data.get('interests', '').split('|')
-                    interestIDList = [self.genreIDs[interest] for interest in interestList if interest in self.genreIDs]
-                    user_interests[userID] = interestIDList
+            users_ref = db.collection('user_info').stream()
+            for doc in users_ref:
+                data = doc.to_dict()
+                userID = int(doc.id)  # Using Firestore document ID as userId
+                interestList = str(data.get('interests', '')).split('|')
+                interestIDList = [self.genreIDs[interest] for interest in interestList if interest in self.genreIDs]
+                user_interests[userID] = interestIDList
         
-                return user_interests
+            return user_interests
+
 
         def getMovieName(self, movieID):
                 return self.movieID_to_name.get(movieID, "")
